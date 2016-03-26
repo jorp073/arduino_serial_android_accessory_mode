@@ -7,13 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.usb.UsbAccessory;
-import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
@@ -24,11 +19,14 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.xh.arduino.accessory.mode.ArduinoManager;
+import com.xh.arduino.accessory.mode.UsbBroadcastReceiver;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity {
-    private final String TAG = "MainActivity";
+    private final String TAG = "xh.serial.MainActivity";
 
     private EditText editText;
     private Button button;
@@ -42,6 +40,7 @@ public class MainActivity extends Activity {
     PendingIntent pendingIntent;
 
     ArduinoManager arduinoManager;
+    UsbBroadcastReceiver mUsbReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,9 +60,10 @@ public class MainActivity extends Activity {
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
 
         arduinoManager=new ArduinoManager(this);
+        mUsbReceiver=new UsbBroadcastReceiver(arduinoManager);
 
-        pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
-        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);//连接响应
+        pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(UsbBroadcastReceiver.ACTION_USB_PERMISSION), 0);
+        IntentFilter filter = new IntentFilter(UsbBroadcastReceiver.ACTION_USB_PERMISSION);//连接响应
         filter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);//断开响应
         registerReceiver(mUsbReceiver, filter);
     }
@@ -96,31 +96,29 @@ public class MainActivity extends Activity {
         }
     }
 
-    public static final String ACTION_USB_PERMISSION ="com.xh.USB_PERMISSION";
-
-    private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            Log.d(TAG, "broadcast");
-            if (ACTION_USB_PERMISSION.equals(action)) {
-                synchronized (this) {
-                    UsbAccessory accessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
-                    if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                        Toast.makeText(MainActivity.this, "Allow USB Permission", Toast.LENGTH_SHORT).show();
-                        arduinoManager.connectAccessory(accessory);
-                    } else {
-                        Toast.makeText(MainActivity.this, "Deny USB Permission", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            } else if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action)) {
-                Log.d(TAG, "usb detached");
-                arduinoManager.restart();
-            } else {
-                Log.d("LED", "....");
-            }
-        }
-    };
+//    public static final String ACTION_USB_PERMISSION ="com.xh.USB_PERMISSION";
+//
+//    private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            String action = intent.getAction();
+//            Log.d(TAG, "broadcast");
+//            if (ACTION_USB_PERMISSION.equals(action)) {
+//                synchronized (this) {
+//                    UsbAccessory accessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
+//                    if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+//                        Toast.makeText(MainActivity.this, "Allow USB Permission", Toast.LENGTH_SHORT).show();
+//                        arduinoManager.connectAccessory(accessory);
+//                    } else {
+//                        Toast.makeText(MainActivity.this, "Deny USB Permission", Toast.LENGTH_SHORT).show();
+//                    }
+//                }
+//            } else if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action)) {
+//                Log.d(TAG, "usb detached");
+//                arduinoManager.restart();
+//            }
+//        }
+//    };
 
     @Override
     protected void onStop() {

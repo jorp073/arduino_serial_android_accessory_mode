@@ -1,4 +1,4 @@
-package xh.serial;
+package com.xh.arduino.accessory.mode;
 
 import android.os.Handler;
 import android.os.SystemClock;
@@ -6,6 +6,8 @@ import android.util.Log;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+
+import xh.serial.R;
 
 public class SerialInputManager implements Runnable {
     private static final String TAG = "SerialInputManager";

@@ -1,14 +1,11 @@
-package xh.serial;
+package com.xh.arduino.accessory.mode;
 
 import android.content.Context;
 import android.hardware.usb.UsbAccessory;
-import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Handler;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
-import android.os.SystemClock;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -16,12 +13,11 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import xh.serial.MainActivity;
+import xh.serial.R;
 
 /**
  * Created by pc on 2016/2/1.

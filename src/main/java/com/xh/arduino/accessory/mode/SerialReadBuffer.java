@@ -1,4 +1,4 @@
-package xh.serial;
+package com.xh.arduino.accessory.mode;
 
 /**
  * Created by pc on 2016/1/30.
