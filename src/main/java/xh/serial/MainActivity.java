@@ -2,13 +2,13 @@ package xh.serial;
 
 import android.app.Activity;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
@@ -17,7 +17,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.xh.arduino.accessory.mode.ArduinoManager;
 import com.xh.arduino.accessory.mode.UsbBroadcastReceiver;
@@ -33,39 +32,42 @@ public class MainActivity extends Activity {
 
     private ListView listView;
     private final int listViewMax = 10;
-    private List<String> listViewData = new ArrayList<String>();
+    private List<String> listViewData = new ArrayList<>();
     private ArrayAdapter<String> listViewAdapter;
 
     UsbManager usbManager;
     PendingIntent pendingIntent;
-
     ArduinoManager arduinoManager;
+
     UsbBroadcastReceiver mUsbReceiver;
+    MainActivityHandler handler;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         editText = (EditText) findViewById(R.id.editText);
         button = (Button) findViewById(R.id.button);
         button.setOnClickListener(buttonOnClickListener);
 
         listView = (ListView) findViewById(R.id.listView);
-        listViewAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listViewData);
+        listViewAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listViewData);
         listView.setAdapter(listViewAdapter);
 
+        handler=new MainActivityHandler(MainActivity.this);
+        arduinoManager=handler.getArduinoManager();
 
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
 
-        arduinoManager=new ArduinoManager(this);
-        mUsbReceiver=new UsbBroadcastReceiver(arduinoManager);
+        mUsbReceiver = new UsbBroadcastReceiver(handler);
 
         pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(UsbBroadcastReceiver.ACTION_USB_PERMISSION), 0);
         IntentFilter filter = new IntentFilter(UsbBroadcastReceiver.ACTION_USB_PERMISSION);//连接响应
         filter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);//断开响应
-        registerReceiver(mUsbReceiver, filter);
+        registerReceiver(mUsbReceiver, filter);//注册接收器
     }
 
     Button.OnClickListener buttonOnClickListener = new Button.OnClickListener() {
@@ -73,9 +75,10 @@ public class MainActivity extends Activity {
         public void onClick(View v) {
             String s = editText.getText().toString();
             if (s.isEmpty()) {
-               // arduinoManager.write(ArduinoManager.Command.READ_DISTANCE.value());
+                // arduinoManager.write(ArduinoManager.Command.READ_DISTANCE.value());
                 return;
             }
+
             arduinoManager.send(s);
         }
     };
@@ -89,36 +92,12 @@ public class MainActivity extends Activity {
         listViewAdapter.notifyDataSetChanged();
     }
 
-    public void getUsbPermission(UsbAccessory device){
-        Log.d(TAG,"request permission");
+    public void getUsbPermission(UsbAccessory device) {//获取usb权限
+        Log.d(TAG, "request permission");
         synchronized (mUsbReceiver) {
-            usbManager.requestPermission(device,pendingIntent);
+            usbManager.requestPermission(device, pendingIntent);
         }
     }
-
-//    public static final String ACTION_USB_PERMISSION ="com.xh.USB_PERMISSION";
-//
-//    private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            String action = intent.getAction();
-//            Log.d(TAG, "broadcast");
-//            if (ACTION_USB_PERMISSION.equals(action)) {
-//                synchronized (this) {
-//                    UsbAccessory accessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
-//                    if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-//                        Toast.makeText(MainActivity.this, "Allow USB Permission", Toast.LENGTH_SHORT).show();
-//                        arduinoManager.connectAccessory(accessory);
-//                    } else {
-//                        Toast.makeText(MainActivity.this, "Deny USB Permission", Toast.LENGTH_SHORT).show();
-//                    }
-//                }
-//            } else if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action)) {
-//                Log.d(TAG, "usb detached");
-//                arduinoManager.restart();
-//            }
-//        }
-//    };
 
     @Override
     protected void onStop() {

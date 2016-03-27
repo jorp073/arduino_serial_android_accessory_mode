@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import xh.serial.MainActivity;
 import xh.serial.R;
 
 /**
@@ -26,14 +25,14 @@ public class ArduinoManager extends Handler {
     private final String TAG = "ArduinoManager";
     private Context context;
     private final UsbManager usbManager;
-    private final MainActivity activity;
+    private Handler mainHandler;
     SerialReadBuffer readBuffer = new SerialReadBuffer();
 
-    public ArduinoManager(MainActivity activity) {
-        this.activity = activity;
-        this.context = activity.getApplicationContext();
+    public ArduinoManager(Context context,Handler handler) {
+        this.context =context;
+        this.mainHandler=handler;
         usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
-        sendEmptyMessage(R.id.arduino_search_device);//开始搜索
+        sendEmptyMessageDelayed(R.id.arduino_search_device,500);//开始搜索
     }
 
     @Override
@@ -46,14 +45,12 @@ public class ArduinoManager extends Handler {
                 }
                 break;
             case R.id.arduino_receive_data:
-                int size = readBuffer.size();
-                if (size > 0) {
-                    for (int i = 0; i < size; i++) {
-                        activity.arduinoShowReceiveData(readBuffer.read());
-                    }
-                }
+                    mainHandler.sendEmptyMessage(R.id.handle_arduino_receive_data);
                 break;
         }
+    }
+    public SerialReadBuffer getSerialReadBuffer(){
+        return this.readBuffer;
     }
 
     public UsbAccessory searchDevice() {
@@ -84,7 +81,8 @@ public class ArduinoManager extends Handler {
     }
 
     public void requestUsbPermission(UsbAccessory device) {
-        activity.getUsbPermission(device);
+        Message message=mainHandler.obtainMessage(R.id.handle_request_usb_permission,device);
+        message.sendToTarget();
     }
 
     ParcelFileDescriptor fileDescriptor;
@@ -100,10 +98,6 @@ public class ArduinoManager extends Handler {
             FileDescriptor fd = fileDescriptor.getFileDescriptor();
             inputStream = new FileInputStream(fd);
             outputStream = new FileOutputStream(fd);
-            if (inputStream == null || outputStream == null) {
-                Log.w(TAG, "no io found");
-                return;
-            }
             inputManager = new SerialInputManager(inputStream, this, readBuffer);
             mExecutor.submit(inputManager);
         }
@@ -133,7 +127,7 @@ public class ArduinoManager extends Handler {
         readBuffer.clean();
         //重新开始查找
         this.removeMessages(R.id.arduino_search_device);
-        this.sendEmptyMessage(R.id.arduino_search_device);
+        this.sendEmptyMessageDelayed(R.id.arduino_search_device,500);
     }
 
     public void close() {
