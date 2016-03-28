@@ -31,17 +31,6 @@ public class MainActivityHandler extends Handler {
             case R.id.handle_arduino_receive_data:
                 arduinoReceiveData();
                 break;
-            case R.id.handle_request_usb_permission:
-                UsbAccessory device=(UsbAccessory)msg.obj;
-                activity.getUsbPermission(device);
-                break;
-            case R.id.handle_response_permission:
-                UsbAccessory deviceWithPermission=(UsbAccessory)msg.obj;
-                arduinoManager.connectAccessory(deviceWithPermission);
-                break;
-            case R.id.handle_reset_arduino:
-                arduinoManager.restart();
-                break;
         }
     }
 

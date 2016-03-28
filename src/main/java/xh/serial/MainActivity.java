@@ -19,7 +19,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.xh.arduino.accessory.mode.ArduinoManager;
-import com.xh.arduino.accessory.mode.UsbBroadcastReceiver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,10 +38,7 @@ public class MainActivity extends Activity {
     PendingIntent pendingIntent;
     ArduinoManager arduinoManager;
 
-    UsbBroadcastReceiver mUsbReceiver;
     MainActivityHandler handler;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,12 +58,12 @@ public class MainActivity extends Activity {
 
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
 
-        mUsbReceiver = new UsbBroadcastReceiver(handler);
+ //       mUsbReceiver = new UsbBroadcastReceiver(handler);
 
-        pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(UsbBroadcastReceiver.ACTION_USB_PERMISSION), 0);
-        IntentFilter filter = new IntentFilter(UsbBroadcastReceiver.ACTION_USB_PERMISSION);//连接响应
-        filter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);//断开响应
-        registerReceiver(mUsbReceiver, filter);//注册接收器
+//        pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(UsbBroadcastReceiver.ACTION_USB_PERMISSION), 0);
+//        IntentFilter filter = new IntentFilter(UsbBroadcastReceiver.ACTION_USB_PERMISSION);//连接响应
+//        filter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);//断开响应
+//        registerReceiver(mUsbReceiver, filter);//注册接收器
     }
 
     Button.OnClickListener buttonOnClickListener = new Button.OnClickListener() {
@@ -92,17 +88,16 @@ public class MainActivity extends Activity {
         listViewAdapter.notifyDataSetChanged();
     }
 
-    public void getUsbPermission(UsbAccessory device) {//获取usb权限
-        Log.d(TAG, "request permission");
-        synchronized (mUsbReceiver) {
-            usbManager.requestPermission(device, pendingIntent);
-        }
-    }
+//    public void getUsbPermission(UsbAccessory device) {//获取usb权限
+//        Log.d(TAG, "request permission");
+//        synchronized (mUsbReceiver) {
+//            usbManager.requestPermission(device, pendingIntent);
+//        }
+//    }
 
     @Override
     protected void onStop() {
         super.onStop();
-        unregisterReceiver(mUsbReceiver);
         arduinoManager.close();
     }
 
