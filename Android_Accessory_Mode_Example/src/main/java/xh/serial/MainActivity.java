@@ -1,15 +1,9 @@
 package xh.serial;
 
 import android.app.Activity;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
-import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,7 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.xh.arduino.accessory.mode.ArduinoManager;
+import com.xh.usb.accessory.mode.ArduinoManager;
 
 import java.util.ArrayList;
 import java.util.List;

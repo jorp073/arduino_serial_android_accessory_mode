@@ -1,4 +1,4 @@
-package com.xh.arduino.accessory.mode;
+package com.xh.usb.accessory.mode;
 
 /**
  * Created by pc on 2016/1/30.

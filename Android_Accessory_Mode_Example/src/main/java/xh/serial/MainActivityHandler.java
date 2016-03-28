@@ -1,12 +1,12 @@
 package xh.serial;
 
 import android.content.Context;
-import android.hardware.usb.UsbAccessory;
 import android.os.Handler;
 import android.os.Message;
 
-import com.xh.arduino.accessory.mode.ArduinoManager;
-import com.xh.arduino.accessory.mode.SerialReadBuffer;
+import com.xh.usb.accessory.mode.ArduinoManager;
+import com.xh.usb.accessory.mode.SerialReadBuffer;
+
 
 public class MainActivityHandler extends Handler {
     private MainActivity activity;
@@ -28,7 +28,7 @@ public class MainActivityHandler extends Handler {
     @Override
     public void handleMessage(Message msg) {
         switch (msg.what) {
-            case R.id.handle_arduino_receive_data:
+            case 0:
                 arduinoReceiveData();
                 break;
         }

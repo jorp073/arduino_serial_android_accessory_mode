@@ -1,4 +1,4 @@
-package com.xh.arduino.accessory.mode;
+package com.xh.usb.accessory.mode;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import xh.serial.R;
-
 public class ArduinoManager extends Handler {
     private final String TAG = "ArduinoManager";
 
@@ -36,7 +34,7 @@ public class ArduinoManager extends Handler {
         this.context = context;
         this.mainHandler = handler;
         usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
-        sendEmptyMessageDelayed(R.id.arduino_search_device, 500);//开始搜索
+        sendEmptyMessageDelayed(0, 500);//开始搜索
 
         pendingIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
         filter = new IntentFilter(ACTION_USB_PERMISSION);//连接响应
@@ -47,14 +45,14 @@ public class ArduinoManager extends Handler {
     @Override
     public void handleMessage(Message msg) {
         switch (msg.what) {
-            case R.id.arduino_search_device:
+            case 0:
                 UsbAccessory device = searchDevice();
                 if (device == null) {
-                    this.sendEmptyMessageDelayed(R.id.arduino_search_device, 3000);//3秒后重新搜索
+                    this.sendEmptyMessageDelayed(0, 3000);//3秒后重新搜索
                 }
                 break;
-            case R.id.arduino_receive_data:
-                mainHandler.sendEmptyMessage(R.id.handle_arduino_receive_data);
+            case 1:///receive data
+                mainHandler.sendEmptyMessage(0);
                 break;
         }
     }
@@ -167,8 +165,8 @@ public class ArduinoManager extends Handler {
 
         readBuffer.clean();
         //重新开始查找
-        this.removeMessages(R.id.arduino_search_device);
-        this.sendEmptyMessageDelayed(R.id.arduino_search_device, 500);
+        this.removeMessages(0);
+        this.sendEmptyMessageDelayed(0, 500);
     }
 
     public void close() {

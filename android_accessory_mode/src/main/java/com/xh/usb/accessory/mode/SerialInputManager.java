@@ -1,4 +1,4 @@
-package com.xh.arduino.accessory.mode;
+package com.xh.usb.accessory.mode;
 
 import android.os.Handler;
 import android.os.SystemClock;
@@ -7,7 +7,6 @@ import android.util.Log;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import xh.serial.R;
 
 public class SerialInputManager implements Runnable {
     private static final String TAG = "SerialInputManager";
@@ -46,7 +45,7 @@ public class SerialInputManager implements Runnable {
                     SystemClock.sleep(50);
                 }else{
                     readBuffer.append(byteBuffer,bytes);
-                    handler.sendEmptyMessage(R.id.arduino_receive_data);
+                    handler.sendEmptyMessage(1);
                 }
             } catch (IOException e) {
                 this.bytes = 0;
