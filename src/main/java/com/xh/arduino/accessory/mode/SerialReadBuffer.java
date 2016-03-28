@@ -17,23 +17,13 @@ public class SerialReadBuffer {
         }
     }
 
-//    public void append(byte[] inputByte, int bytes) {
-//        for (int i = 0; i < bytes; i++) {
-//            if (inputByte[i] == 0x0A) {//回车
-//                counter++;
-//            }
-//            readBuffer.append((char) inputByte[i]);
-//        }
-//    }
-
     public void append(byte[] inputByte, int bytes) {
         for (int i = 0; i < bytes; i++) {
-            readBuffer.append((char)inputByte[i]);
+            if (inputByte[i] == 0x0A) {//回车
+                counter++;
+            }
+            readBuffer.append((char) inputByte[i]);
         }
-        readBuffer.append("size=");
-        readBuffer.append(bytes);
-        readBuffer.append("\n");
-        counter++;
     }
 
     public int size() {

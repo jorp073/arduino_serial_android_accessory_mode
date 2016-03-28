@@ -39,6 +39,8 @@ void sendMessage() {
       timer = millis();
 
       sendBuffer += timer;
+      sendBuffer +="\r\n";
+      
       int slen = sendBuffer.length();
       if (slen > 64) { //最多64位
         slen = 64;
@@ -47,8 +49,7 @@ void sendMessage() {
       sendBuffer.toCharArray(sendChar, slen + 1);
       //发送
       adk.SndData(slen, (uint8_t *)sendChar);
-      Serial.println(timer);
-      Serial.println(sendBuffer);
+      Serial.print(sendBuffer);
       sendBuffer = "";
     }
   }

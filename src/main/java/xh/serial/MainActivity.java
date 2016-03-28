@@ -35,9 +35,7 @@ public class MainActivity extends Activity {
     private ArrayAdapter<String> listViewAdapter;
 
     UsbManager usbManager;
-    PendingIntent pendingIntent;
     ArduinoManager arduinoManager;
-
     MainActivityHandler handler;
 
     @Override
@@ -57,13 +55,6 @@ public class MainActivity extends Activity {
         arduinoManager=handler.getArduinoManager();
 
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-
- //       mUsbReceiver = new UsbBroadcastReceiver(handler);
-
-//        pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(UsbBroadcastReceiver.ACTION_USB_PERMISSION), 0);
-//        IntentFilter filter = new IntentFilter(UsbBroadcastReceiver.ACTION_USB_PERMISSION);//连接响应
-//        filter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);//断开响应
-//        registerReceiver(mUsbReceiver, filter);//注册接收器
     }
 
     Button.OnClickListener buttonOnClickListener = new Button.OnClickListener() {
