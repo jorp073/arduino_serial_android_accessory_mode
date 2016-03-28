@@ -69,7 +69,6 @@ public class ArduinoManager extends Handler {
                 synchronized (this) {
                     UsbAccessory accessory = intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
                     if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                        Toast.makeText(context, "同意连接", Toast.LENGTH_SHORT).show();
                         connectAccessory(accessory);
                     } else {
                         Toast.makeText(context, "Deny USB Permission", Toast.LENGTH_SHORT).show();
@@ -106,9 +105,12 @@ public class ArduinoManager extends Handler {
         }
         UsbAccessory accessory = (accessories == null ? null : accessories[0]);
         if (accessory != null) {
-            //TODO:在这里加入设备判断
 
-            ///String Manufacturer=accessory.getManufacturer();
+            if(!accessory.getModel().contains("Arduino")){
+                Toast.makeText(context, "控制设备型号不正确", Toast.LENGTH_SHORT).show();
+                Log.w(TAG,"device not arduino");
+                return null;
+            }
 
             if (usbManager.hasPermission(accessory)) {
                 connectAccessory(accessory);
@@ -127,6 +129,7 @@ public class ArduinoManager extends Handler {
 
     public void connectAccessory(UsbAccessory accessory) {
         Log.d(TAG, "connecting");
+        Toast.makeText(context, "连接设备", Toast.LENGTH_SHORT).show();
         fileDescriptor = usbManager.openAccessory(accessory);
         if (fileDescriptor != null) {
             FileDescriptor fd = fileDescriptor.getFileDescriptor();
@@ -153,7 +156,9 @@ public class ArduinoManager extends Handler {
 
     public void reset() {
         Log.d(TAG, "restart");
-        inputManager.stop();
+        if(inputManager!=null){
+            inputManager.stop();
+        }
         inputManager = null;
 
         close();

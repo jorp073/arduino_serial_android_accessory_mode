@@ -88,12 +88,14 @@ public class MainActivity extends Activity {
         listViewAdapter.notifyDataSetChanged();
     }
 
-//    public void getUsbPermission(UsbAccessory device) {//获取usb权限
-//        Log.d(TAG, "request permission");
-//        synchronized (mUsbReceiver) {
-//            usbManager.requestPermission(device, pendingIntent);
-//        }
-//    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(arduinoManager!=null){
+            arduinoManager.reset();
+        }
+    }
 
     @Override
     protected void onStop() {

@@ -41,5 +41,4 @@ public class MainActivityHandler extends Handler {
         }
     }
 
-
 }
