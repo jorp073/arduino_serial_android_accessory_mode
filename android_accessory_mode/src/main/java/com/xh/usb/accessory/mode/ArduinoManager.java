@@ -25,15 +25,16 @@ public class ArduinoManager extends Handler {
 
     private Context context;
     private final UsbManager usbManager;
-    private Handler mainHandler;
     private PendingIntent pendingIntent;
     private IntentFilter filter;
+    private Listener listener;
     SerialReadBuffer readBuffer = new SerialReadBuffer();
 
-    public ArduinoManager(Context context, Handler handler) {
+    public ArduinoManager(Context context, Listener listener) {
         this.context = context;
-        this.mainHandler = handler;
         usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
+        this.listener = listener;
+
         sendEmptyMessageDelayed(0, 500);//开始搜索
 
         pendingIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
@@ -52,9 +53,17 @@ public class ArduinoManager extends Handler {
                 }
                 break;
             case 1:///receive data
-                mainHandler.sendEmptyMessage(0);
+                listener.onReceiveData();
                 break;
         }
+    }
+
+    public interface Listener {
+        void onReceiveData();
+    }
+
+    public String read() {
+        return readBuffer.read();
     }
 
     public static final String ACTION_USB_PERMISSION = "com.xh.serial.accessory.USB_PERMISSION";
@@ -85,16 +94,18 @@ public class ArduinoManager extends Handler {
         usbManager.requestPermission(accessory, pendingIntent);
     }
 
-    public SerialReadBuffer getSerialReadBuffer() {
-        return this.readBuffer;
-    }
+    /////////
+    private int searchCount=0;
+    ///////
 
-    public UsbAccessory searchDevice() {
+    private UsbAccessory searchDevice() {
         Log.d(TAG, "searching arduino........");
+        ///debug///发个信息显示//
+        searchCount++;
+        readBuffer.append("search:"+searchCount);
+        this.sendEmptyMessage(1);
+        /////
 
-        if (inputStream != null && outputStream != null) {
-            return null;
-        }
 
         UsbAccessory[] accessories = usbManager.getAccessoryList();
         if (accessories != null) {
@@ -103,13 +114,11 @@ public class ArduinoManager extends Handler {
         }
         UsbAccessory accessory = (accessories == null ? null : accessories[0]);
         if (accessory != null) {
-
-            if(!accessory.getModel().contains("Arduino")){
+            if (!accessory.getModel().contains("Arduino")) {
                 Toast.makeText(context, "控制设备型号不正确", Toast.LENGTH_SHORT).show();
-                Log.w(TAG,"device not arduino");
+                Log.w(TAG, "device not arduino");
                 return null;
             }
-
             if (usbManager.hasPermission(accessory)) {
                 connectAccessory(accessory);
             } else {
@@ -125,7 +134,7 @@ public class ArduinoManager extends Handler {
     SerialInputManager inputManager;
     private final ExecutorService mExecutor = Executors.newCachedThreadPool();
 
-    public void connectAccessory(UsbAccessory accessory) {
+    private void connectAccessory(UsbAccessory accessory) {
         Log.d(TAG, "connecting");
         Toast.makeText(context, "连接设备", Toast.LENGTH_SHORT).show();
         fileDescriptor = usbManager.openAccessory(accessory);
@@ -152,50 +161,47 @@ public class ArduinoManager extends Handler {
         }
     }
 
-    public void reset() {
+    private void reset() {
         Log.d(TAG, "restart");
-        if(inputManager!=null){
+        if (inputManager != null) {
             inputManager.stop();
         }
-        inputManager = null;
-
-        close();
-
-        context.registerReceiver(usbBroadcastReceiver, filter);//注册接收器
-
         readBuffer.clean();
+        close();
         //重新开始查找
-        this.removeMessages(0);
         this.sendEmptyMessageDelayed(0, 500);
     }
 
-    public void close() {
-        try {
-            if (fileDescriptor != null)
+    private void close() {
+        if (fileDescriptor != null) {
+            try {
                 fileDescriptor.close();
-        } catch (IOException e) {
-            Log.w(TAG, "close fail：" + e.getMessage(), e);
-        }
-
-        try {
-            if (inputStream != null) {
-                inputStream.close();
+            } catch (IOException e) {
+                Log.w(TAG, e.getMessage());
             }
-        } catch (IOException e) {
-            Log.w(TAG, "close fail：" + e.getMessage(), e);
         }
-
-        try {
-            if (outputStream != null)
+        if (inputStream != null) {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                Log.w(TAG, e.getMessage());
+            }
+        }
+        if (outputStream != null) {
+            try {
                 outputStream.close();
-        } catch (IOException e) {
-            Log.w(TAG, "close fail：" + e.getMessage(), e);
+            } catch (IOException e) {
+                Log.w(TAG, e.getMessage());
+            }
         }
+    }
 
-        fileDescriptor = null;
-        inputStream = null;
-        outputStream = null;
-
+    public void destroy() {
+        if (inputManager != null) {
+            inputManager.stop();
+        }
+        close();
+        this.removeMessages(0);
         context.unregisterReceiver(usbBroadcastReceiver);
     }
 }

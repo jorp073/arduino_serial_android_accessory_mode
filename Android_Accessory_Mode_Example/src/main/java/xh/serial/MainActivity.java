@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,7 +30,6 @@ public class MainActivity extends Activity {
     private ArrayAdapter<String> listViewAdapter;
 
     UsbManager usbManager;
-    ArduinoManager arduinoManager;
     MainActivityHandler handler;
 
     @Override
@@ -45,10 +45,9 @@ public class MainActivity extends Activity {
         listViewAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listViewData);
         listView.setAdapter(listViewAdapter);
 
-        handler=new MainActivityHandler(MainActivity.this);
-        arduinoManager=handler.getArduinoManager();
-
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+
+        handler=new MainActivityHandler(MainActivity.this);
     }
 
     Button.OnClickListener buttonOnClickListener = new Button.OnClickListener() {
@@ -56,11 +55,9 @@ public class MainActivity extends Activity {
         public void onClick(View v) {
             String s = editText.getText().toString();
             if (s.isEmpty()) {
-                // arduinoManager.write(ArduinoManager.Command.READ_DISTANCE.value());
                 return;
             }
-
-            arduinoManager.send(s);
+            handler.send(s);
         }
     };
 
@@ -77,15 +74,20 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        if(arduinoManager!=null){
-            arduinoManager.reset();
-        }
+        Log.d(TAG,"resume");
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        arduinoManager.close();
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG,"pause");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG,"destroy");
+        handler.destroy();
     }
 
     @Override
